@@ -178,7 +178,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <TextInput value={currentName} placeholder='name' onChangeText={setCurrentName} />
-      <Button title="Add Namefff" onPress={addName} />
+      <Button title="Add Name" onPress={addName} />
       {showNames()}
       <Button title="Export Db" onPress={exportDb} />
       <Button title="Import Db" onPress={importDb} />
