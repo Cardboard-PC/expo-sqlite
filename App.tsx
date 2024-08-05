@@ -1,7 +1,7 @@
-import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TextInput, Button, Platform } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import * as SQLite from 'expo-sqlite';
-import { useState, useEffect } from 'react';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
@@ -39,12 +39,35 @@ import * as DocumentPicker from 'expo-document-picker';
   expo start --dev-client
 */
 
+interface Name {
+  id: number;
+  name: string;
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    justifyContent: 'space-between',
+    margin: 8
+  }
+});
 
 export default function App() {
   const [db, setDb] = useState(SQLite.openDatabase('example.db'));
   const [isLoading, setIsLoading] = useState(true);
-  const [names, setNames] = useState([]);
-  const [currentName, setCurrentName] = useState(undefined);
+  // const [names, setNames] = useState([]); // JS
+  // const [names, setNames] = useState<string | number | null | undefined>(null); // TypeScript BAD
+  const [names, setNames] = useState<Name[]>([]); // TypeScript
+  // const [currentName, setCurrentName] = useState<Name | undefined>(undefined);
+  const [currentName, setCurrentName] = useState<string>("");
 
   const exportDb = async () => {
     if (Platform.OS === "android") {
@@ -77,7 +100,7 @@ export default function App() {
 
     if (result.type === 'success') {
       setIsLoading(true);
-      
+
       if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
         await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
       }
@@ -100,19 +123,23 @@ export default function App() {
       tx.executeSql('CREATE TABLE IF NOT EXISTS names (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)')
     });
 
+
     db.transaction(tx => {
-      tx.executeSql('SELECT * FROM names', null,
+      tx.executeSql('SELECT * FROM names', undefined,
         (txObj, resultSet) => setNames(resultSet.rows._array),
-        (txObj, error) => console.log(error)
+        // (txObj, error) => console.log(error) // JavaScript
+        (txObj, error) => { console.log(error); return false; } // TypeScript
       );
     });
 
     setIsLoading(false);
   }, [db]);
 
+// <View style={styles.container}>
+
   if (isLoading) {
     return (
-      <View style={styles.container}>
+      <View>
         <Text>Loading names...</Text>
       </View>
     );
@@ -120,19 +147,25 @@ export default function App() {
 
   const addName = () => {
     db.transaction(tx => {
-      tx.executeSql('INSERT INTO names (name) values (?)', [currentName],
+      tx.executeSql(
+        'INSERT INTO names (name) values (?)',
+        [currentName],
         (txObj, resultSet) => {
-          let existingNames = [...names];
-          existingNames.push({ id: resultSet.insertId, name: currentName});
-          setNames(existingNames);
-          setCurrentName(undefined);
+          // if ( typeof currentName !== 'string' ) { console.error("currentName is not a string"); return; } // TypeScript
+          if ( resultSet.insertId == undefined ) { console.error("Insert ID is undefined"); return; } // happens on: 1. SQL Statement Erorr, 2. no auto-increment primary-key, 3. transaction failure, 4. non-insert SQL operation
+          else {
+            let existingNames = [...names]; // names from `const [names, setNames] = useState([]);`
+            existingNames.push({ id: resultSet.insertId, name: currentName });
+            setNames(existingNames);
+            setCurrentName("");
+          }
         },
-        (txObj, error) => console.log(error)
+        (txObj, error) => { console.log(error); return false; }
       );
     });
   }
 
-  const deleteName = (id) => {
+  const deleteName = (id: number) => {
     db.transaction(tx => {
       tx.executeSql('DELETE FROM names WHERE id = ?', [id],
         (txObj, resultSet) => {
@@ -141,24 +174,24 @@ export default function App() {
             setNames(existingNames);
           }
         },
-        (txObj, error) => console.log(error)
+        (txObj, error) => { console.log(error); return false; }
       );
     });
   };
 
-  const updateName = (id) => {
+  const updateName = (id: number) => {
     db.transaction(tx => {
       tx.executeSql('UPDATE names SET name = ? WHERE id = ?', [currentName, id],
         (txObj, resultSet) => {
           if (resultSet.rowsAffected > 0) {
             let existingNames = [...names];
-            const indexToUpdate = existingNames.findIndex(name => name.id === id);
+            const indexToUpdate = existingNames.findIndex(name => name.id === id); // name is input for this lambda function
             existingNames[indexToUpdate].name = currentName;
             setNames(existingNames);
-            setCurrentName(undefined);
+            setCurrentName("");
           }
         },
-        (txObj, error) => console.log(error)
+        (txObj, error) => { console.log(error); return false; }
       );
     });
   };
@@ -187,18 +220,4 @@ export default function App() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'stretch',
-    justifyContent: 'space-between',
-    margin: 8
-  }
-});
+
