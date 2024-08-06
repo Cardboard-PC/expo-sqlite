@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, Platform } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, Platform, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as SQLite from 'expo-sqlite';
 import * as Sharing from 'expo-sharing';
@@ -51,12 +51,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // https://styled-components.com/docs/basics
+  // alignSelf: 'stretch',
+  // justifyContent: 'space-between',
+  // justifyContent: 'space-evenly',
+  // justifyContent: 'flex-end',
+  // flexGrow: 2, // causes it to fill 2 parts of the whole
+  // flexGrow: 2, // causes it to fill 3 parts of the total
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'stretch',
+    marginHorizontal: 10,
+    marginVertical: 3,
+  },
+  uDButton: {
+    // padding: 20,
+    marginHorizontal: 5,
+    backgroundColor: '#f00000',
+  },
+  rowName: {
+    flexGrow: 2, // causes it to grow
+    flexDirection: 'row',
+    alignSelf: 'stretch',
     justifyContent: 'space-between',
-    margin: 8
   }
 });
 
@@ -66,7 +84,6 @@ export default function App() {
   // const [names, setNames] = useState([]); // JS
   // const [names, setNames] = useState<string | number | null | undefined>(null); // TypeScript BAD
   const [names, setNames] = useState<Name[]>([]); // TypeScript
-  // const [currentName, setCurrentName] = useState<Name | undefined>(undefined);
   const [currentName, setCurrentName] = useState<string>("");
 
   const exportDb = async () => {
@@ -200,8 +217,8 @@ export default function App() {
     return names.map((name, index) => {
       return (
         <View key={index} style={styles.row}>
-          <Text>{name.name}</Text>
-          <Button title='Delete' onPress={() => deleteName(name.id)} />
+          <Text style={styles.rowName}>{name.name}</Text>
+          <View style={styles.uDButton}><Button title='Delete' onPress={() => deleteName(name.id)} /></View>
           <Button title='Update' onPress={() => updateName(name.id)} />
         </View>
       );
@@ -211,9 +228,9 @@ export default function App() {
   return (
     <View style={styles.container}>
       <TextInput value={currentName} placeholder='name' onChangeText={setCurrentName} />
-      <Button title="Add Namefff" onPress={addName} />
+      <Button title="Add Name" onPress={addName} />
       {showNames()}
-      <Button title="Export Db" onPress={exportDb} />
+      <Button title="Export Db" onPress={exportDb}/>
       <Button title="Import Db" onPress={importDb} />
       <StatusBar style="auto" />
     </View>
