@@ -47,8 +47,12 @@ import CountDown, { CountDownProps } from './CountDown';
 
 const CountDown_Demo = () => {
   // const [direction, setDirection] = useState('ltr');
-  const dueTime1 = new Date();    dueTime1.setHours(23, 0, 0, 0);  // 11:00pm
-  const dueTime2 = new Date();    dueTime2.setHours(23, 30, 0, 0); // 11:30pm
+  const dueTime1 = new Date();    dueTime1.setHours(23, 0, 0, 0);  // 11:00pm today
+  const dueTime2 = new Date();    dueTime2.setHours(23, 30, 0, 0); // 11:30pm today
+  // let   dueTime3 = new Date();    dueTime2.setHours(23, 30, 0, 0);
+  // dueTime3.setDate(dueTime3.getDate() + 1);                        // 11:30pm tomorrow
+  let   dueTime3 = new Date();    dueTime2.setHours(23, 30, 0, 0);
+  dueTime3.setDate(dueTime3.getDate() + 2);                        // 11:30pm tomorrow
 
   return (
     <View style={styles.container}>
@@ -61,6 +65,10 @@ const CountDown_Demo = () => {
       <CountDown
         label="CD 2"
         dueTime={dueTime2}>
+      </CountDown>
+      <CountDown
+        label="CD 4"
+        dueTime={dueTime3}>
       </CountDown>
     </View>
   );
