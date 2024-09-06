@@ -1,0 +1,40 @@
+The syntax of the example you have provided seems very odd... 1. Why is calculateTimeLeft() not declared as a `function calculateTimeLeft() { ... }`? Why is it declared as a `const calculateTimeLeft = () => { ... }`? 2. This also applies to the `CountDown` component.
+
+3. Please explain how the repeating update works, I am confused by the placement, use of `return` and why `setInterval` appears before `clearInterval` i.e.
+```
+calculateTimeLeft();
+const timer = setInterval(calculateTimeLeft, 1000);
+return () => clearInterval(timer);
+```
+
+import React, { useEffect, useState } from 'react';
+
+const CountDown = () => {
+  const [daysStr, setDaysStr] = useState('');
+  const [hoursStr, setHoursStr] = useState('');
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      // Some logic to calculate days and hours
+      const days = 5; // Example value
+      const hours = 10; // Example value
+
+      // Update state variables
+      setDaysStr(`${days} days`);
+      setHoursStr(`${hours} hours`);
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div>
+      <p>{daysStr}</p>
+      <p>{hoursStr}</p>
+    </div>
+  );
+};
+
+export default CountDown;

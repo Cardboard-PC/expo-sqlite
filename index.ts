@@ -15,5 +15,8 @@ import { registerRootComponent } from 'expo';
 // import CountDown from './CountDown';  // Uncomment when testing
 // registerRootComponent(CountDown);          // Uncomment when testing
 //
-import CountDown_Demo from './CountDown_Demo';  // Uncomment when testing
-registerRootComponent(CountDown_Demo);          // Uncomment when testing
+// import CountDown_Demo from './CountDown_Demo';  // Uncomment when testing
+// registerRootComponent(CountDown_Demo);          // Uncomment when testing
+//
+import Task_Demo from './Task_Demo';  // Uncomment when testing
+registerRootComponent(Task_Demo);          // Uncomment when testing

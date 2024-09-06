@@ -2,22 +2,68 @@ import React, { useState, useEffect, ReactElement } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import type { PropsWithChildren } from 'react';
 
-interface CountDownProps extends PropsWithChildren {
+// interface CountDownProps extends PropsWithChildren {
+class CountDownProps {
   label:   string;
-  dueTime: Date;
+  dueDate: Date;
+  displayNumHoursAhead?:     number; // 0-48, typically 8 to 16 if set, defaults to 24
+  displayNumHoursOfNextDay?: number; // 0-24, typically 8 to 12 if set, defaults to 10
+
+  constructor(
+    label
+  ) {
+    this.label = "";
+    dueDate: Date;
+    displayNumHoursAhead?:     number; // 0-48, typically 8 to 16 if set, defaults to 24
+    displayNumHoursOfNextDay?: number; // 0-24, typically 8 to 12 if set, defaults to 10
+  }
 };
+
+type TimeUntilDue = {
+  currentTime:   Date;
+  overdueBool:   boolean;
+  overdueStr:    string;
+  daysStr:       string;
+  totalHoursStr: string;
+  minutesStr:    string;
+  secondsStr:    string;
+}
+
+function hoursUntilTomorrow(now: Date): number {
+  return 24 - (now.getHours());
+}
+
+function taskIsPastToday(now: Date, dueDate: Date): boolean {
+  if ((dueDate.getTime() - now.getTime()) / ( 1000 * 60 * 60 * 24) >= 1) { return true; }
+  else { return false; }
+}
+
+function taskIsOverdue(now: Date, dueDate: Date): boolean {
+  if (((dueDate.getTime() - now.getTime())) >= 0) { return false; }
+  else { return true; }
+}
+
+// function hoursUntilTask(now: Date, dueDate: Date, ): number {
+// }
 
 // function CountDown(props: CountDownProps) { // WORKS but requires `props.propertyName` to access properties
 // function CountDown({label, dueTime}: React.FC<CountDownProps>) { // WORKS
-function CountDown({label, dueTime}: CountDownProps) { // WORKS
-  const [currentTime, setCurrentTime] = useState(new Date());
-  // const [timeUntilDue, settimeUntilDue] = useState<string>('');
-  const [daysStr, setDaysStr] = useState<string>('');
-  const [hoursStr, setHoursStr] = useState<string>('');
-  const [minutesStr, setMinutesStr] = useState<string>('');
-  const [secondsStr, setSecondsStr] = useState<string>('');
-  const [overdueBool, setOverdueBool] = useState<boolean>(false);
-  // const [time]
+// function CountDown({label, dueTime}: CountDownProps) { // WORKS
+const CountDown = ({
+  label = "",
+  dueDate: dueDate,
+  displayNumHoursAhead = 24,
+  displayNumHoursOfNextDay = 10,
+}: CountDownProps) => {
+  const [tud, setTud] = useState<TimeUntilDue>({
+    currentTime:   new Date(),
+    overdueBool:   false,
+    overdueStr:    "",
+    daysStr:       "",
+    totalHoursStr: "",
+    minutesStr:    "",
+    secondsStr:    "",
+  });
 
 
   // const maxHoursAllowed = 24;
@@ -27,104 +73,79 @@ function CountDown({label, dueTime}: CountDownProps) { // WORKS
   //             [ ] -- Other units of measurements, such as pomodoro time periods
   //                    -- e.g. with 25 minutes of work and 5 minutes of rest per cycle a 55 minute task would be 2.1 cycles + 2 breaks. should these be spaced evenly or should the breaks be at the end?
 
-  // // Note: variables needed for rendering
-  // let daysStr:    string = "";
-  // let hoursStr:   string = "";
-  // let minutesStr: string = "";
-  // let secondsStr: string = "";
-
-
   // useEffect for an automatic update?
   useEffect(() => {
-    const interval = setInterval(() => {
+    const updateTud = () => {
+      const newTud: TimeUntilDue = {
+        currentTime:   new Date(),
+        overdueBool:   false,
+        overdueStr:    "",
+        daysStr:       "",
+        totalHoursStr: "",
+        minutesStr:    "",
+        secondsStr:    "",
+      };
+
       const now = new Date();
-      setCurrentTime(now);
+      // setCurrentTime(now);
 
-      const timeDifference = dueTime.getTime() - now.getTime();
-      // OLD VERSION
-      // const hours   = Math.floor(timeDifference  / (1000 * 60 * 60))
-      // const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60))
-      // const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
-      // if (timeDifference > 0) {
-      //   settimeUntilDue(`${hours}h ${minutes}m ${seconds}s`);
-      // } else {
-      //   settimeUntilDue(`+${hours}h ${minutes}m ${seconds}s`);
-      // }
-      // return (
-      //     <View style={styles.container}>
-      //       <Text>{label}</Text>
-      //       <Text style={styles.timeText}>Current Time: {currentTime.toLocaleTimeString()}</Text>
-      //       <Text style={styles.timeText}>
-      //         <Text style={styles.smallTimeText}>Time Until Due: </Text>
-      //         {timeUntilDue}
-      //       </Text>
-      //   </View>
-      // );
-      //
-      // NEW VERSION
+      const timeDifference = dueDate.getTime() - now.getTime();
       // days
-      const daysNum: number   = Math.floor(timeDifference  / (1000 * 60 * 60 * 24))
-      // let   daysStr: string;
+      const daysNum:    number = Math.floor( timeDifference                          / (1000 * 60 * 60 * 24));
+      const hoursNum:   number = Math.floor((timeDifference                        ) / (1000 * 60 * 60     ));
+      const minutesNum: number = Math.floor((timeDifference % (1000 * 60 * 60     )) / (1000 * 60          ));
+      const secondsNum: number = Math.floor((timeDifference % (1000 * 60          )) / (1000               ));
       if (daysNum !== 0) {
-        setDaysStr(String(daysNum))
-        // daysStr = String(daysNum).padStart(2, '0') + "d"; // `.padStart()` Converts `9` into `"09"`, etc.
-        // if (timeDifference > 0) {
-        //   settimeUntilDue(daysStr + "d");
-        // } else {
-        //   settimeUntilDue('+' + daysStr + "d");
-        // }
+        newTud.daysStr = String(daysNum);
       }
-      // else { // IF (daysNum == 0)
-        // hours
-        // const hoursNum:   number = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)); // limits visibility of next day
-        const hoursNum:   number = Math.floor((timeDifference                        ) / (1000 * 60 * 60));
-        const minutesNum: number = Math.floor((timeDifference % (1000 * 60 * 60     )) / (1000 * 60     ));
-        const secondsNum: number = Math.floor((timeDifference % (1000 * 60          )) / (1000          ));
-        if (hoursNum == 0) {
-          setHoursStr("");
-        } else {
-          setHoursStr(String(hoursNum).padStart(2, '0')); // `.padStart()` Converts `9` into `"09"`, etc.
-        }
-        if (hoursNum == 0 && minutesNum == 0) {
-          setMinutesStr("");
-        } else {
-          setMinutesStr(String(hoursNum).padStart(2, '0')); // `.padStart()` Converts `9` into `"09"`, etc.
-        }
-        if (hoursNum == 0 && minutesNum == 0 && secondsNum === 0) {
-          setSecondsStr("");
-        } else {
-          setSecondsStr(String(secondsNum).padStart(2, '0')); // `.padStart()` Converts `9` into `"09"`, etc.
-        }
-        //
-        // IF overdue
-        if (timeDifference > 0) {
-          setOverdueBool(false);
-          // settimeUntilDue(hoursStr + minutesStr + secondsStr);
-        } else {
-          setOverdueBool(true);
-          // settimeUntilDue('+' + hoursStr + minutesStr + secondsStr);
-        }
-        // settimeUntilDue(`+${hoursStr}h ${minutesStr}m ${secondsStr}s`);
-      // }
-    }, 1000); // update every 1000ms
+      if (hoursNum !== 0) {
+        newTud.totalHoursStr   = String(hoursNum  ).padStart(2, '0'); // `.padStart()` Converts `9` into `"09"`, etc.
+      }
+      if (hoursNum !== 0 && minutesNum !== 0) {
+        newTud.minutesStr = String(hoursNum  ).padStart(2, '0'); // `.padStart()` Converts `9` into `"09"`, etc.
+      }
+      if (hoursNum !== 0 && minutesNum !== 0 && secondsNum !== 0) {
+        newTud.secondsStr = String(secondsNum).padStart(2, '0'); // `.padStart()` Converts `9` into `"09"`, etc.
+      }
+      // IF overdue
+      if (timeDifference < 0) { newTud.overdueBool = true; newTud.overdueStr = "+"; }
 
+      setTud({...newTud});
+    }
+
+    const interval = setInterval(() => { updateTud();}, 1000); // update every 1000ms
     return () => clearInterval(interval);
   }, []);
 
+
+
+  // --- REACT ELEMENT ---
   let resultRE: ReactElement;
-  let overdueStr = "";
-  if (overdueBool) { overdueStr = "+"; }
+  // let overdueStr = "";
+  // if (overdueBool) { overdueStr = "+"; }
   // if overdueBool {}
   //
   // if (daysStr !== "") {
-  if (daysStr !== "" && overdueStr == "22") {
+  if (tud.daysStr !== "") {
+    // console.log("daysStr: " + tud.daysStr);
+    // display hours until next task if allowed to show for next day
+    // const hoursPastToday = dueTime.getHours() - 
+    const now = new Date();
+    const hourUntilEndOfDay = 24 - now.getHours();
+    if (Number(tud.totalHoursStr) - hourUntilEndOfDay <= displayNumHoursOfNextDay) {
     resultRE = (
       <View style={styles.container}>
-        <Text style={styles.timeText}>{daysStr}d</Text>
-      </View>
-    )
+        <Text style={styles.timeText}>{tud.daysStr}d</Text>
+      </View>);
+    } else {
+      // IF is task is far in the future, display it in days
+      resultRE = (
+      <View style={styles.container}>
+        <Text style={styles.timeText}>{tud.daysStr}d</Text>
+      </View>);
+    }
   } else {
-    // console.log("dayStr: " + daysStr);
+    // console.log("dayStr:s " + daysStr);
     // if (daysStr == "") {console.log("dayStr is \"\"\t1 end");}
     // if (daysStr === "") {console.log("dayStr is \"\"\t2 end");}
     // console.log("hoursStr: " + hoursStr + "\tend");
@@ -134,14 +155,16 @@ function CountDown({label, dueTime}: CountDownProps) { // WORKS
         <Text style={styles.timeText}>
           {/* <Text style={styles.smallTimeText}>Time Until Due: </Text> */}
           <Text style={styles.smallTimeText}>{label}: </Text>
-          {currentTime.toLocaleTimeString()}___  {/* for testing */}
+          {/* for testing */}
+          {/* {tud.currentTime.toLocaleTimeString()}___ */}
           {/* {'\u2236'} : Unicode Ratio Character */}
-          {hoursStr}{'\u2236'}{minutesStr}{'\u2236'}{secondsStr}
+          {tud.totalHoursStr}{'\u2236'}{tud.minutesStr}{'\u2236'}{tud.secondsStr}
         </Text>
       </View>
     )
   }
-  //
+
+  // --- RETURN DISPLAY OF REACT ELEMENT ---
   return ( resultRE );
 };
 

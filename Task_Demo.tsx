@@ -8,8 +8,8 @@ import * as DocumentPicker from 'expo-document-picker';
 import Timer from './Timer';
 
 import MainApp from './MainApp';
-import CountDown, { CountDownProps } from './TimeRemaining';
-// import CountDownProps from './CountDown';
+import Task, { TaskProps } from './Task';
+// import TaskProps from './Task';
 
 // expo add expo-sqlite
 // expo add expo-file-system
@@ -45,36 +45,52 @@ import CountDown, { CountDownProps } from './TimeRemaining';
 */
 
 
-const CountDown_Demo = () => {
+const Task_Demo = () => {
   // const [direction, setDirection] = useState('ltr');
-  const dueTime1 = new Date();    dueTime1.setHours(23, 0, 0, 0);  // 11:00pm today
-  const dueTime2 = new Date();    dueTime2.setHours(23, 30, 0, 0); // 11:30pm today
-  // let   dueTime3 = new Date();    dueTime2.setHours(23, 30, 0, 0);
-  // dueTime3.setDate(dueTime3.getDate() + 1);                        // 11:30pm tomorrow
-  let   dueTime3 = new Date();    dueTime2.setHours(23, 30, 0, 0);
-  dueTime3.setDate(dueTime3.getDate() + 1);                        // 11:30pm tomorrow
+  // !!!!! `new Date(new Date().getDate() + 1)` is BUGGED !!!!
+  // const startTime1 = new Date(new Date().setDate(new Date().getDate() + 1));    startTime1.setHours( 7, 0, 0, 0);  //  7:00am today
+  // const startTime2 = new Date(new Date().setDate(new Date().getDate() + 1));    startTime2.setHours( 9, 0, 0, 0);  //  9:00am today
+  // const startTime3 = new Date(new Date().setDate(new Date().getDate() + 1));    startTime3.setHours(11, 0, 0, 0);  // 11:00am today
+  // const dueTime1   = new Date(new Date().setDate(new Date().getDate() + 1));      dueTime1.setHours(23, 0, 0, 0);  // 11:00pm today
+  // const dueTime2   = new Date(new Date().setDate(new Date().getDate() + 1));      dueTime2.setHours(23, 30, 0, 0); // 11:30pm today
+  // const dueTime3   = new Date(new Date().setDate(new Date().getDate() + 1)); dueTime3.setHours(23, 30, 0, 0); // 11:30pm tomorrow
+  const startTime1 = new Date();    startTime1.setHours( 7, 0, 0, 0);  //  7:00am today
+  const startTime2 = new Date();    startTime2.setHours( 9, 0, 0, 0);  //  9:00am today
+  const startTime3 = new Date();    startTime3.setHours(11, 0, 0, 0);  // 11:00am today
+  const dueTime1   = new Date();      dueTime1.setHours(23, 0, 0, 0);  // 11:00pm today
+  const dueTime2   = new Date();      dueTime2.setHours(23, 30, 0, 0); // 11:30pm today
+  const dueTime3   = new Date(new Date().setDate(new Date().getDate() + 1)); dueTime3.setHours(23, 30, 0, 0); // 11:30pm tomorrow
 
   return (
     <View style={styles.container}>
       {/* File Identifier */}
-      <Text>CountDown_Demo.tsx</Text>
+      <Text>Android Header Spacer</Text>
+      <Text>Task_Demo.tsx</Text>
       {/* <MainApp /> */}
-      <Text>Hello</Text>
-      <CountDown
+      <Task
         label="CD 1"
+        startDate={startTime1}
         dueDate={dueTime1}
         displayNumHoursOfNextDay={12}>
-      </CountDown>
-      <CountDown
+      </Task>
+      <Task
         label="CD 2"
+        startDate={startTime2}
         dueDate={dueTime2}
         displayNumHoursOfNextDay={12}>
-      </CountDown>
-      <CountDown
-        label="CD 4"
+      </Task>
+      <Task
+        label="CD 3"
+        startDate={startTime3}
         dueDate={dueTime3}
         displayNumHoursOfNextDay={12}>
-      </CountDown>
+      </Task>
+      <Task
+        label="CD 4"
+        startDate={startTime3}
+        dueDate={dueTime3}
+        displayNumHoursOfNextDay={12}>
+      </Task>
     </View>
   );
 }
@@ -92,5 +108,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CountDown_Demo;
+export default Task_Demo;
 
