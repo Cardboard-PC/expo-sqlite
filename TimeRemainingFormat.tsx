@@ -91,7 +91,7 @@ interface TimeRemainingFormatProps {
   timeFormats: TimeFormat[];
 }
 
-export default TimeRemainingFormat;
+// export default TimeRemainingFormat;
 
 const styles = StyleSheet.create({
   smallText: {

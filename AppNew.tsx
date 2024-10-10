@@ -1,18 +1,46 @@
+import { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TextInput, Button, Platform } from 'react-native';
 import * as SQLite from 'expo-sqlite';
-import { useState, useEffect } from 'react';
 import * as Sharing from 'expo-sharing';
-// import * as FileSystem from 'expo-file-system';
-// import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
+import * as DocumentPicker from 'expo-document-picker';
 
-export default function App() {
-  const db = SQLite.openDatabase('example.db');
+export default function AppNew() {
+  const databaseName = 'example.db';
+  const db = SQLite.openDatabase(databaseName);
   const [isLoading, setIsLoading] = useState(false);
-  const [names, setNames] = useState([]);
-  const [currentName, setCurrentName] = useState(undefined);
+  // TODO add alternative for 1., 2.
+  // 1. const [names, setNames] = useState([]);
+  // 2. const [currentName, setCurrentName] = useState(undefined);
 
-  // Is called everytime the component is rendered (only once :) here)
+  const exportDb = async () => {
+    if (Platform.OS === "android") {
+      // console.log(FileSystem.documentDirectory + 'SQLite/example.db' + '<-- path of database'); // DEBGUG -log path of database to Console
+      console.log(FileSystem.documentDirectory + databaseName + '<-- path of database'); // DEBGUG -log path of database to Console
+      const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+      if (permissions.granted) {
+        const base64 = await FileSystem.readAsStringAsync(
+          FileSystem.documentDirectory + 'SQLite/example.db',
+          {
+            encoding: FileSystem.EncodingType.Base64
+          }
+        );
+
+        await FileSystem.StorageAccessFramework.createFileAsync(permissions.directoryUri, 'example.db', 'application/octet-stream')
+        .then(async (uri) => {
+          await FileSystem.writeAsStringAsync(uri, base64, { encoding : FileSystem.EncodingType.Base64 });
+        })
+        .catch((e) => console.log(e));
+      } else {
+        console.log("Permission not granted");
+      }
+    } else {
+      await Sharing.shareAsync(FileSystem.documentDirectory + 'SQLite/example.db');
+    }
+  }
+
+  // Is called everytime the component is rendered (only once here)
   useEffect(() => {
     db.transaction(tx => {
       tx.executeSql('CREATE TABLE IF NOT EXISTS names (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)');

@@ -89,6 +89,8 @@ export default function MainApp() { // App --> MainApp
 
   const exportDb = async () => {
     if (Platform.OS === "android") {
+      // exports to: `file:///data/user/0/host.exp.exponent/files/ExperienceData/%2540anonymous%252Fexpo-sqlite-tutorial-9d5e8030-24ea-4677-bc3b-400558688a21/SQLite/example.db`
+      console.log(FileSystem.documentDirectory + 'SQLite/example.db'); // DEBGUG -log path of database to Console
       const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
       if (permissions.granted) {
         const base64 = await FileSystem.readAsStringAsync(
